@@ -41,7 +41,7 @@ public class Application {
             WebClientOptions options = webClient.getOptions();
             options.setThrowExceptionOnFailingStatusCode(false);
             options.setThrowExceptionOnScriptError(false);
-            HtmlPage page = webClient.getPage("http://www.ishadowsocks.org/");
+            HtmlPage page = webClient.getPage("http://www.ishadow.info/");
 
             Path path = Paths.get("D:\\Program Files\\zhanhb\\ss\\gui-config.json");
             GuiConfigs guiConfigs = GuiConfigs.parse(path);
