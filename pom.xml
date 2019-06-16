@@ -14,7 +14,7 @@
 
     <properties>
         <htmlunit.version>2.35.0</htmlunit.version>
-        <netbeans.hint.license>apache20</netbeans.hint.license>
+        <netbeans.hint.license>mit</netbeans.hint.license>
         <starter-class>com.github.zhanhb.ishadowsocks.Application</starter-class>
     </properties>
 
