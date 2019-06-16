@@ -41,24 +41,32 @@ public class Application {
             WebClientOptions options = webClient.getOptions();
             options.setThrowExceptionOnFailingStatusCode(false);
             options.setThrowExceptionOnScriptError(false);
-            HtmlPage page = webClient.getPage("http://www.ishadow.info/");
+            options.setDownloadImages(false);
+            HtmlPage page = webClient.getPage("https://free.ishadowx.org/");
 
-            Path path = Paths.get("D:\\Program Files\\zhanhb\\ss\\gui-config.json");
-            GuiConfigs guiConfigs = GuiConfigs.parse(path);
-            Collection<Server> servers
-                    = Stream.concat(
-                            guiConfigs.getConfigs().stream(),
-                            page.querySelectorAll("#free .row>div[class*='col-'][class*='-4']")
-                            .stream()
-                            .map(node -> node.getTextContent().trim())
-                            .map(Server::newServer)
-                            .filter(Objects::nonNull)
-                    )
-                    .collect(Collectors.toMap(identity(), identity(), (a, b) -> b, LinkedHashMap::new))
-                    .values();
+            Stream<Server> parsed = page.querySelectorAll("#portfolio .portfolio-item")
+                    .stream()
+                    .map(node -> node.getTextContent().trim())
+                    .map(Server::newServer)
+                    .filter(Objects::nonNull);
 
-            guiConfigs.setConfigs(new LinkedHashSet<>(servers));
-            guiConfigs.writeTo(path);
+            if (args.length > 0) {
+                Path path = Paths.get(args[0]);
+                GuiConfigs guiConfigs = GuiConfigs.parse(path);
+                Collection<Server> servers
+                        = Stream.concat(
+                                guiConfigs.getConfigs().stream(),
+                                parsed
+                        )
+                                .collect(Collectors.toMap(identity(), identity(), (a, b) -> b, LinkedHashMap::new))
+                                .values();
+
+                guiConfigs.setConfigs(new LinkedHashSet<>(servers));
+                guiConfigs.writeTo(path);
+            } else {
+                parsed.forEach(System.out::println);
+            }
         }
     }
+
 }

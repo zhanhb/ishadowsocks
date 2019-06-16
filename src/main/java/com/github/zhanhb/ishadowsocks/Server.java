@@ -30,10 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Server {
 
-    private static final Pattern HOST_PATTERN = Pattern.compile("(?i)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?+(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?+)++");
-    private static final Pattern PORT_PATTERN = Pattern.compile("(?<=\\D)\\d{3,5}+(?=\\D)");
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?<=\\D)\\d{6,}+(?=\\D)");
-    private static final Pattern METHOD_PATTERN = Pattern.compile("(?i)table|rc4-md5|salsa20|chacha20|aes-\\d+-cfb|rc4");
+    private static final Pattern HOST_PATTERN = Pattern.compile("(?i)IP Address:\\s*([a-z0-9](?:[a-z0-9-]*[a-z0-9])?+(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?+)++)");
+    private static final Pattern PORT_PATTERN = Pattern.compile("(?i)Port:\\s*(\\d{2,5}+)");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("(?i)Password:\\s*([^\\s]+)");
+    private static final Pattern METHOD_PATTERN = Pattern.compile("(?i)Method:\\s*(table|rc4-md5|salsa20|chacha20|"
+            + "(aes|camellia)-\\d+-(?:cfb|ctr|gcm)|"
+            + "rc4|bf-cfb|salsa20|x?chacha20(?:-ietf(?:-poly1305)?)?)");
 
     public static Server newServer(String text) {
         try {
@@ -56,15 +58,14 @@ public class Server {
         server_port = Integer.parseInt(get(PORT_PATTERN, text));
         password = get(PASSWORD_PATTERN, text);
         method = get(METHOD_PATTERN, text).toLowerCase();
-        int indexOf = text.indexOf(server);
-        remarks = text.substring(0, indexOf).replace(":", "");
+        remarks = server + ":" + server_port;
     }
 
     private String get(Pattern pattern, String text) {
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
             // throw an exception if not found
-            return matcher.group();
+            return matcher.group(1);
         }
         throw new IllegalStateException(String.format("No match found, text='%s', pattern='%s'", text, pattern));
     }
