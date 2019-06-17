@@ -27,16 +27,21 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebClientOptions;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import static java.util.function.Function.identity;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *
@@ -52,24 +57,30 @@ public class Application {
             options.setDownloadImages(false);
             HtmlPage page = webClient.getPage("https://free.ishadowx.org/");
 
-            Stream<Server> parsed = page.querySelectorAll("#portfolio .portfolio-item")
+            Stream<JsonObject> parsed = page.querySelectorAll("#portfolio .portfolio-item")
                     .stream()
                     .map(node -> node.getTextContent().trim())
                     .map(Server::newServer)
-                    .filter(Objects::nonNull);
+                    .filter(Objects::nonNull)
+                    .map(Server::toJsonObject);
 
             if (args.length > 0) {
                 Path path = Paths.get(args[0]);
                 GuiConfigs guiConfigs = GuiConfigs.parse(path);
-                Collection<Server> servers
+                JsonArray configs = guiConfigs.getConfigs();
+                Collection<JsonObject> servers
                         = Stream.concat(
-                                guiConfigs.getConfigs().stream(),
+                                StreamSupport.stream(Spliterators.spliterator(configs.iterator(),
+                                        configs.size(), Spliterator.ORDERED), false)
+                                        .map(JsonElement::getAsJsonObject),
                                 parsed
                         )
-                                .collect(Collectors.toMap(identity(), identity(), (a, b) -> b, LinkedHashMap::new))
+                                .collect(Collectors.toMap(jo -> {
+                                    return jo.get("server").getAsString() + ":" + jo.get("server_port").getAsString();
+                                }, identity(), (a, b) -> b, LinkedHashMap::new))
                                 .values();
 
-                guiConfigs.setConfigs(new LinkedHashSet<>(servers));
+                guiConfigs.setConfigs(servers);
                 guiConfigs.writeTo(path);
             } else {
                 parsed.forEach(System.out::println);

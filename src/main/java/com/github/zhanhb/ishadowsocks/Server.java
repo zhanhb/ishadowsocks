@@ -23,10 +23,10 @@
  */
 package com.github.zhanhb.ishadowsocks;
 
+import com.google.gson.JsonObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author zhanhb
  */
 @Data
-@EqualsAndHashCode(of = {"server", "server_port"})
 @Slf4j
 public class Server {
 
@@ -76,6 +75,16 @@ public class Server {
             return matcher.group(1);
         }
         throw new IllegalStateException(String.format("No match found, text='%s', pattern='%s'", text, pattern));
+    }
+
+    public JsonObject toJsonObject() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("server", server);
+        jsonObject.addProperty("server_port", server_port);
+        jsonObject.addProperty("password", password);
+        jsonObject.addProperty("method", method);
+        jsonObject.addProperty("remarks", remarks);
+        return jsonObject;
     }
 
 }

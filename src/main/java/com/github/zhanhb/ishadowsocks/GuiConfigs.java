@@ -24,6 +24,8 @@
 package com.github.zhanhb.ishadowsocks;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -31,16 +33,14 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.Objects;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author zhanhb
  */
-@Data
 @Slf4j
 public class GuiConfigs {
 
@@ -53,24 +53,18 @@ public class GuiConfigs {
     }
 
     public static GuiConfigs parse(Reader reader) {
-        return gson.fromJson(reader, GuiConfigs.class);
+        return new GuiConfigs(gson.fromJson(reader, JsonObject.class));
     }
 
-    private LinkedHashSet<Server> configs;
-    private String strategy;
-    private Integer index;
-    private Boolean global;
-    private Boolean enabled;
-    private Boolean shareOverLan;
-    private Boolean isDefault;
-    private Integer localPort;
-    private String pacUrl;
-    private Boolean useOnlinePac;
-    private Boolean availabilityStatistics;
+    private final JsonObject jsonObject;
+
+    public GuiConfigs(JsonObject jsonObject) {
+        this.jsonObject = jsonObject;
+    }
 
     public void writeTo(Writer writer) throws IOException {
         Objects.requireNonNull(writer);
-        String json = gson.toJson(this);
+        String json = gson.toJson(jsonObject);
         log.debug("gui-config.json: {}", json);
         writer.write(json);
     }
@@ -80,4 +74,17 @@ public class GuiConfigs {
             writeTo(bw);
         }
     }
+
+    void setConfigs(Collection<JsonObject> configs) {
+        JsonArray array = new JsonArray(configs.size());
+        for (JsonObject config : configs) {
+            array.add(config);
+        }
+        jsonObject.add("configs", array);
+    }
+
+    JsonArray getConfigs() {
+        return jsonObject.get("configs").getAsJsonArray();
+    }
+
 }
