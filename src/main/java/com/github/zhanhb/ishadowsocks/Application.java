@@ -52,10 +52,15 @@ public class Application {
     public static void main(String[] args) throws IOException {
         try (WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
             WebClientOptions options = webClient.getOptions();
+            options.setCssEnabled(false);
+            options.setDoNotTrackEnabled(true);
+            options.setDownloadImages(false);
+            options.setGeolocationEnabled(false);
+            options.setJavaScriptEnabled(false);
             options.setThrowExceptionOnFailingStatusCode(false);
             options.setThrowExceptionOnScriptError(false);
-            options.setDownloadImages(false);
-            HtmlPage page = webClient.getPage("https://free.ishadowx.org/");
+
+            HtmlPage page = webClient.getPage("https://free.ishadowx.org");
 
             Stream<JsonObject> parsed = page.querySelectorAll("#portfolio .portfolio-item")
                     .stream()

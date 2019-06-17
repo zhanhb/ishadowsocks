@@ -45,6 +45,9 @@ public class Server {
             + "rc4|bf-cfb|salsa20|x?chacha20(?:-ietf(?:-poly1305)?)?)");
 
     public static Server newServer(String text) {
+        if (!text.toLowerCase().contains("address")) {
+            return null;
+        }
         try {
             return new Server(text);
         } catch (IllegalStateException e) {
