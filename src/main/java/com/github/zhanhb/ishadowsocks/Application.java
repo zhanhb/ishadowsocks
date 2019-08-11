@@ -60,7 +60,7 @@ public class Application {
             options.setThrowExceptionOnFailingStatusCode(false);
             options.setThrowExceptionOnScriptError(false);
 
-            HtmlPage page = webClient.getPage("https://free.ishadowx.org");
+            HtmlPage page = webClient.getPage("https://xxx.ishadowx.org");
 
             Stream<JsonObject> parsed = page.querySelectorAll("#portfolio .portfolio-item")
                     .stream()
